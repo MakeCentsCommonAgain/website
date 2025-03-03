@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>US DEBT TRACKER</title>
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #fba21b;
+      color: #000;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      padding-top: 30px;
+      padding-bottom: 30px;
+    }
+
+    h1, h2 {
+      text-transform: uppercase;
+      font-family: monospace;
+      width: 100%;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+      display: block;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: -1px;
+      border-bottom: 2px solid #000;
+      padding-bottom: 10px;
+      margin-top: 2px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    h2 {
+      font-size: 16px;
+      font-weight: normal;
+      letter-spacing: 1;
+      margin: 0 auto;
+      padding-bottom: 0;
+      color: #000;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .clock {
+      width: clamp(120px, 25vw, 180px);
+      height: clamp(120px, 25vw, 180px);
+      margin: 0 auto;
+      position: relative;
+      background: #fff;
+      border: 4px solid #000;
+      border-radius: 50%;
+      margin-bottom: 20px;
+    }
+
+    .clock-face {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .hand {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 50% 50%;
+      background: #000;
+    }
+
+    .hour-hand {
+      width: 6px;
+      height: 35%;
+      margin-left: -3px;
+      margin-top: -17.5%;
+    }
+
+    .minute-hand {
+      width: 4px;
+      height: 45%;
+      margin-left: -2px;
+      margin-top: -22.5%;
+    }
+
+    .second-hand {
+      width: 2px;
+      height: 50%;
+      margin-left: -1px;
+      margin-top: -25%;
+      background: #f00;
+    }
+
+    .clock-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      margin-left: -6px;
+      margin-top: -6px;
+      background: #000;
+      border-radius: 50%;
+    }
+
+    .hour-marks {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hour-mark {
+      position: absolute;
+      width: 4px;
+      height: 12px;
+      background: #000;
+      left: 50%;
+      margin-left: -2px;
+      transform-origin: 50% 90px;
+    }
+
+    .debt-label {
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      margin-top: 2px;
+      font-family: monospace;
+    }
+
+    .debt-counter {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: bold;
+      padding: 8px;
+      margin: 2px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Container for debt counter and its labels */
+    .debt-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      margin: 10px 0;
+      width: 100%;
+    }
+
+    .stick-figure-container {
+      height: 25vh;
+      min-height: 150px;
+      max-height: 250px;
+      position: relative;
+      overflow: hidden;
+      margin-top: -80px;
+    }
+
+    .ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 4px;
+      background: #000;
+    }
+
+    #stick-figure {
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      transform-origin: center;
+    }
+
+    .debt-weight {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    .footer {
+      margin-top: 30px;
+      font-size: 14px;
+      border-top: 2px solid #000;
+      padding-top: 20px;
+      font-weight: regular;
+      width: 100%;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Remove visitor counter styles */
+    .visitor-counter,
+    .visitor-counter-label,
+    .digit-container,
+    .digit,
+    .digit-display,
+    .segment {
+      display: none;
+    }
+
+    .appendage {
+      transform-origin: 50% 85px;
+      animation: swing 2s infinite ease-in-out;
+    }
+
+    @keyframes swing {
+      0% { transform: rotate(-30deg); }
+      50% { transform: rotate(30deg); }
+      100% { transform: rotate(-30deg); }
+    }
+
+    #stick-figure line,
+    #stick-figure polyline,
+    #stick-figure rect {
+      shape-rendering: crispEdges; /* Makes lines more pixelated */
+    }
+
+    .current-date {
+      font-size: 16px;
+      font-weight: normal;
+      font-family: monospace;
+      margin-bottom: 2px;
+    }
+
+    @media (max-height: 700px) {
+      body {
+        padding-top: 15px;
+      }
+
+      .container {
+        gap: 15px;
+      }
+
+      .clock {
+        margin-bottom: 15px;
+      }
+
+      .stick-figure-container {
+        margin-top: -60px;
+        min-height: 120px;
+      }
+
+      .footer {
+        margin-top: 20px;
+        padding-top: 15px;
+      }
+    }
+
+    /* Media queries for different screen sizes */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .current-date {
+        font-size: 14px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+      h2 {
+        font-size: 14px;
+      }
+
+      .debt-counter {
+        font-size: clamp(18px, 4vw, 24px); /* Smaller font on mobile */
+      }
+
+      .footer {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .container {
+        gap: 15px;
+      }
+
+      .clock {
+        width: 120px;
+        height: 120px;
+      }
+
+      .hour-hand {
+        height: 40px;
+      }
+
+      .minute-hand {
+        height: 50px;
+      }
+
+      .second-hand {
+        height: 60px;
+      }
+    }
+
+    /* Handle landscape orientation */
+    @media (orientation: landscape) and (max-height: 600px) {
+      .container {
+        gap: 15px;
+      }
+
+      .stick-figure-container {
+        height: 200px;
+      }
+    }
+
+    /* High-DPI screens */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .hour-mark,
+      .hand,
+      #stick-figure line,
+      #stick-figure polyline,
+      #stick-figure rect {
+        shape-rendering: geometricPrecision;
+      }
+    }
+
+    /* You can also add hover effects if desired */
+    h1:hover, h2:hover {
+      color: #333;
+    }
+
+    /* Shared width for debt counter and stick figure container */
+    .debt-counter,
+    .stick-figure-container {
+      width: 90%;
+      max-width: 600px;
+      margin: 0 auto;
+      border: 4px solid #000;
+      background: #fff;
+      box-sizing: border-box;
+    }
+
+    .debt-counter {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: bold;
+      padding: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stick-figure-container {
+      height: 25vh;
+      min-height: 200px;
+      max-height: 300px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Container for consistent spacing */
+    .debt-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      margin: 15px 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h2>Watch Your Money Disappear in Real Time</h2>
+  <h1>US NATIONAL DEBT TRACKER</h1>
+  
+  <div class="container">
+    <div class="clock">
+      <div class="clock-face">
+        <div class="hour-marks" id="hour-marks"></div>
+        <div class="hand hour-hand" id="hour-hand"></div>
+        <div class="hand minute-hand" id="minute-hand"></div>
+        <div class="hand second-hand" id="second-hand"></div>
+        <div class="clock-center"></div>
+      </div>
+    </div>
+    
+    <div class="debt-container">
+      <span class="current-date" id="current-date"></span>
+      <div class="debt-counter" id="debt-counter">$00,000,000,000,000</div>
+      <div class="debt-label">MEASURED IN SWINGS OF A DICK</div>
+    </div>
+    
+    <div class="stick-figure-container">
+      <svg id="stick-figure" width="100" height="150" viewBox="0 0 100 150">
+        <!-- Pixelated head (square) -->
+        <rect x="35" y="5" width="30" height="30" stroke="black" stroke-width="4" fill="white" />
+        
+        <!-- Body (thicker line for pixel effect) -->
+        <line x1="50" y1="35" x2="50" y2="85" stroke="black" stroke-width="4" />
+        
+        <!-- Arms (stepped for pixel effect) -->
+        <polyline points="20,45 35,50 50,55 65,50 80,45" stroke="black" stroke-width="4" fill="none" />
+        
+        <!-- Legs (stepped for pixel effect) -->
+        <polyline points="30,125 40,105 50,85 60,105 70,125" stroke="black" stroke-width="4" fill="none" />
+        
+        <!-- The appendage with animation -->
+        <g class="appendage">
+          <line x1="50" y1="85" x2="50" y2="105" stroke="black" stroke-width="6" />
+          <circle cx="50" cy="110" r="5" fill="black" />
+        </g>
+      </svg>
+      <div class="ground"></div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    WHY ARE YOU STILL SWINGING? <span id="current-date"></span>
+  </div>
+
+  <script>
+    // Set up the clock hour marks
+    const hourMarksContainer = document.getElementById('hour-marks');
+    for (let i = 0; i < 12; i++) {
+      const mark = document.createElement('div');
+      mark.className = 'hour-mark';
+      mark.style.transform = `rotate(${i * 30}deg)`;
+      hourMarksContainer.appendChild(mark);
+    }
+
+    // Clock function
+    function updateClock() {
+      const now = new Date();
+      const seconds = now.getSeconds();
+      const minutes = now.getMinutes();
+      const hours = now.getHours() % 12;
+      
+      const secondsDegrees = ((seconds / 60) * 360);
+      const minutesDegrees = ((minutes / 60) * 360) + ((seconds / 60) * 6);
+      const hoursDegrees = ((hours / 12) * 360) + ((minutes / 60) * 30);
+      
+      document.getElementById('second-hand').style.transform = `rotate(${secondsDegrees}deg)`;
+      document.getElementById('minute-hand').style.transform = `rotate(${minutesDegrees}deg)`;
+      document.getElementById('hour-hand').style.transform = `rotate(${hoursDegrees}deg)`;
+    }
+    
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // US Debt counter
+    let currentDebt = 34000000000000; // Starting with approximate current debt
+    const debtGrowthPerSecond = 4000; // Approximate growth per second
+    
+    function updateDebt() {
+      currentDebt += debtGrowthPerSecond;
+      document.getElementById('debt-counter').textContent = '$' + currentDebt.toLocaleString();
+      
+      const debtGrowthFactor = (currentDebt - 34000000000000) / 34000000000000;
+      const newLength = Math.min(10 + (debtGrowthFactor * 20), 30);
+      
+      // Update appendage length
+      const line = document.querySelector('.appendage line');
+      line.setAttribute('y2', (85 + newLength).toString());
+      
+      // Update ball position
+      const circle = document.querySelector('.appendage circle');
+      if (circle) {
+        circle.setAttribute('cy', (85 + newLength + 5).toString());
+      }
+      
+      // Update swing animation speed
+      const swingDuration = Math.max(2 - (debtGrowthFactor * 0.5), 0.5);
+      document.documentElement.style.setProperty('--swing-duration', `${swingDuration}s`);
+    }
+    
+    // Fetch actual debt data (this is a placeholder - would need a real API)
+    async function fetchDebtData() {
+      try {
+        // In a real implementation, you would fetch from an actual API
+        // This is just a placeholder to show the concept
+        const response = await fetch('https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/debt_to_penny?sort=-record_date&page[size]=1');
+        const data = await response.json();
+        if (data && data.data && data.data.length > 0) {
+          currentDebt = parseFloat(data.data[0].tot_pub_debt_out_amt.replace(/,/g, ''));
+          updateDebt();
+        }
+      } catch (error) {
+        console.log('Error fetching debt data, using estimate instead');
+      }
+    }
+    
+    // Try to fetch real data, but continue with estimates if it fails
+    fetchDebtData();
+    
+    // Update debt counter regularly
+    setInterval(updateDebt, 1000);
+    updateDebt();
+
+    // Update the date and UTC time
+    function updateDateTime() {
+      const now = new Date();
+      const utcString = now.toUTCString();
+      document.getElementById('current-date').textContent = utcString;
+    }
+
+    // Initialize and update every second
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // Add this to your existing JavaScript
+    // Make sure it's not inside another function
+    document.documentElement.style.setProperty('--swing-duration', '2s');
+  </script>
+</body>
+</html>
+
